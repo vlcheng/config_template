@@ -197,7 +197,7 @@ rule-providers:
   microsoft:
      type: http
      behavior: domain
-     url: https://raw.githubusercontent.com/vlcheng/config_template/main/microsoft.yaml
+     url: https://raw.githubusercontent.com/vlcheng/config_template/main/microsoft.txt
      path: ./providers/rules/microsoft.yaml
      interval: 86400
   reject:
