@@ -1,0 +1,243 @@
+# 端口
+# port: 7890
+# socks-port: 7891
+# redir-port: 7892
+mixed-port: 7890
+
+# 共享
+allow-lan: true
+bind-address: '*'
+# authentication:
+  # - "user1:pass1"
+
+# 模式
+mode: rule  # rule / global / direct
+
+# 日志
+log-level: warning  # info / warning / error / debug / silent
+
+# 外部控制
+external-controller: 127.0.0.1:9090
+# secret: ""
+# external-ui: "./external-ui"
+
+# 网卡绑定
+# interface-name: en0
+
+# 静态解析
+# hosts:
+  # 'foo.com': 127.0.0.1
+
+# V6解析
+ipv6: false
+
+# 劫持系统DNS
+dns:
+  enable: true  # 默认false
+  ipv6: false  # 默认false
+  listen: 0.0.0.0.53
+  # nameserver-policy:  # 下列域名使用指定DNS解析
+    # '+.foo.com': '1.1.1.1'
+  default-nameserver: # 用于解析下列DNS域名，纯IP
+    - 223.5.5.5
+    - 119.29.29.29
+    - 114.114.114.114
+  enhanced-mode: fake-ip  # redir-host / fake-ip
+  fake-ip-range: 198.18.0.1/16  # A类地址，不要改
+  use-hosts: true  # 启用fake-ip-filter
+  fake-ip-filter:  # 一下域名直接返回真实ip
+    - "*.lan"
+    - "*.ntp.org.cn"
+    - "*.openwrt.pool.ntp.org"
+    - time.windows.com
+    - time.apple.com
+    - time1.apple.com
+    - time2.apple.com
+    - time.asia.apple.com
+    - time.ustc.edu.cn
+    - pool.ntp.org
+    - ntp.ubuntu.com
+    - ntp.aliyun.com
+    - ntp1.aliyun.com
+    - ntp2.aliyun.com
+    - time1.aliyun.com
+    - time2.aliyun.com
+    # - time1.google.com
+    # - time2.google.com
+    # - time3.google.com
+  nameserver:  # 默认DNS查询，并发取最快
+    - https://dns.alidns.com/dns-query
+    - https://doh.pub/dns-query
+    - https://dns.cfiec.net/dns-query
+  fallback:  # 如果GEOIP不是CN就用fallback解析结果
+    - https://dns.twnic.tw/dns-query
+    - https://cloudflare-dns.com/dns-query
+    - https://doh.opendns.com/dns-query
+    - https://dns.adguard.com/dns-query
+    - https://doh.dns.sb/dns-query
+    - https://doh.powerdns.org
+  fallback-filter:
+    geoip: true
+    geoip-code: CN
+    ipcidr: # ips in these subnets will be considered polluted
+      - 240.0.0.0/4
+    domain:
+      - '+.google.com'
+      - '+.youtube.com'
+      - '+.rsshub.app'
+      - '+.1drv.ms'
+
+proxy-providers:
+  main-all:
+    type: http
+    path: ./providers/proxies/main.yaml
+    url: https://short.io/ (a free url shorten service)
+    interval: 3600
+    health-check: 
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 900
+  main-jp:
+    type: http
+    path: ./providers/proxies/main.yaml
+    url: https://short.io/ (a free url shorten service)
+    interval: 3600
+    filter: '日本|JP|jp|🇯🇵|Japan'
+    health-check: 
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 300
+  main-us:
+    type: http
+    path: ./providers/proxies/main.yaml
+    url: https://short.io/ (a free url shorten service)
+    interval: 3600
+    filter: '美国|US|us|🇺🇸|United States|America'
+    health-check: 
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 600
+  main-hk:
+    type: http
+    path: ./providers/proxies/main.yaml
+    url: https://short.io/ (a free url shorten service)
+    interval: 3600
+    filter: '香港|HK|hk|🇭🇰|Hong Kong'
+    health-check: 
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 600
+  backup-all:
+    type: http
+    path: ./providers/proxies/backup.yaml
+    url: https://short.io/ (a free url shorten service)
+    interval: 3600
+    health-check: 
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 900
+  backup-jp:
+    type: http
+    path: ./providers/proxies/backup.yaml
+    url: https://short.io/ (a free url shorten service)
+    interval: 3600
+    filter: '日本|JP|jp|🇯🇵|Japan'
+    health-check: 
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 600
+  backup-us:
+    type: http
+    path: ./providers/proxies/backup.yaml
+    url: https://short.io/ (a free url shorten service)
+    interval: 3600
+    filter: '美国|US|us|🇺🇸|United States|America'
+    health-check: 
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 600
+  backup-hk:
+    type: http
+    path: ./providers/proxies/backup.yaml
+    url: https://short.io/ (a free url shorten service)
+    interval: 3600
+    filter: '香港|HK|hk|🇭🇰|Hong Kong'
+    health-check: 
+      enable: true
+      url: http://www.gstatic.com/generate_204
+      interval: 900
+proxy-groups:
+  - {name: 全局, type: 'select', proxies: ['自动', DIRECT, '主力节点', '备用节点', '主力日本', '备用日本', '主力美国', '备用美国', '主力香港', '备用香港']}
+  - {name: 自动, type: 'fallback', url: http://www.gstatic.com/generate_204, interval: 30, proxies: ['主力日本', '主力美国', '主力香港', '备用日本', '备用美国', '备用香港', DIRECT]}
+  - {name: 微软, type: 'select', proxies: ['全局', DIRECT, '主力节点', '备用节点', '自动']}
+  - {name: 直连, type: 'select', proxies: [DIRECT, '全局', '主力节点', '备用节点', '自动']}
+  - {name: 拦截, type: 'select', proxies: [REJECT, DIRECT, '全局']}
+  - {name: 主力节点, type: 'select', use: [main-all]}
+  - {name: 备用节点, type: 'select', use: [backup-all]}
+  - {name: 主力日本, type: 'url-test', url: http://www.gstatic.com/generate_204, interval: 300, tolerance: 50, use: [main-jp]}
+  - {name: 主力美国, type: 'url-test', url: http://www.gstatic.com/generate_204, interval: 600, tolerance: 50, use: [main-us]}
+  - {name: 主力香港, type: 'url-test', url: http://www.gstatic.com/generate_204, interval: 600, tolerance: 50, use: [main-hk]}
+  - {name: 备用日本, type: 'url-test', url: http://www.gstatic.com/generate_204, interval: 600, tolerance: 50, use: [backup-jp]}
+  - {name: 备用美国, type: 'url-test', url: http://www.gstatic.com/generate_204, interval: 600, tolerance: 50, use: [backup-jp]}
+  - {name: 备用香港, type: 'url-test', url: http://www.gstatic.com/generate_204, interval: 900, tolerance: 50, use: [backup-hk]}
+
+rule-providers:
+  icloud:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/icloud.txt
+    path: ./providers/rules/icloud.yaml
+    interval: 86400
+  apple:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/apple.txt
+    path: ./providers/rules/apple.yaml
+    interval: 86400
+  microsoft:
+     type: http
+     behavior: domain
+     url: https://raw.githubusercontent.com/vlcheng/config_template/main/microsoft.yaml
+     path: ./providers/rules/microsoft.yaml
+     interval: 86400
+  reject:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/reject.txt
+    path: ./providers/rules/reject.yaml
+    interval: 86400
+  gfw:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/gfw.txt
+    path: ./providers/rules/gfw.yaml
+    interval: 86400
+  direct:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/applications.txt
+    path: ./providers/rules/direct.yaml
+    interval: 86400
+  proxy:
+    type: http
+    behavior: domain
+    url: https://cdn.jsdelivr.net/gh/Loyalsoldier/clash-rules@release/proxy.txt
+    path: ./providers/rules/proxy.yaml
+    interval: 86400
+rules:
+  - PROCESS-NAME,OneDrive.exe,直连
+  - PROCESS-NAME,SetupHost.exe,直连
+  - PROCESS-NAME,WindowsUpdate.exe,直连
+  - PROCESS-NAME,com.microsoft.skydrive,直连
+  - DOMAIN-SUFFIX,dl.l.google.com,全局
+  - DOMAIN-SUFFIX,dl.google.com,全局
+  - RULE-SET,icloud,直连
+  - RULE-SET,apple,直连
+  - RULE-SET,microsoft,微软
+  - RULE-SET,reject,拦截
+  - RULE-SET,gfw,全局
+  - RULE-SET,direct,DIRECT
+  - RULE-SET,proxy,全局
+  - GEOIP,LAN,DIRECT
+  - GEOIP,CN,DIRECT
+  - MATCH,全局
